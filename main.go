@@ -5,6 +5,7 @@ import (
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
+  "github.com/larspensjo/config"
 	// "time"
 )
 
@@ -42,10 +43,39 @@ func Error(msg string) error {
 func main() {
 
 	http.Handle("/", websocket.Handler(WsServer))
+  serverConfig,err := getConfig("server");
+  if(err != nil){
+    log.Fatal("server config error:", err)
+  }
+	fmt.Println("listen on port "+serverConfig["port"])
 
-	fmt.Println("listen on port 8003")
-
-	if err := http.ListenAndServe(":8003", nil); err != nil {
+	if err := http.ListenAndServe(":"+serverConfig["port"], nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+func getConfig(sec string) (map[string]string,error){
+  targetConfig := make(map[string]string)
+  cfg, err := config.ReadDefault("config.ini")
+	if err != nil {
+		return targetConfig,Error("unable to open config file or wrong fomart")
+	}
+	sections := cfg.Sections()
+	if len(sections) == 0 {
+		return targetConfig,Error("no "+ sec +" config")
+	}
+  for _, section := range sections {
+    if section != sec{
+      continue
+    }
+    sectionData, _ := cfg.SectionOptions(section)
+    for _, key := range sectionData {
+      value, err := cfg.String(section, key)
+      if err == nil {
+        targetConfig[key] = value
+      }
+    }
+    break
+  }
+  return targetConfig,nil
 }
