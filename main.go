@@ -9,24 +9,7 @@ import (
 	// "time"
 )
 
-var CurrentUsers *UserList //在线用户列表
-
-type MessageReply struct {
-	Type    string `json:"type"`
-	Uname   string `json:"uname"`
-	Content string `json:"content"`
-	Time    int64  `json:"time"`
-}
-
-type UidCookieReply struct {
-	Type string `json:"type"`
-	Uid  string `json:"uid"`
-}
-
-type UserCountChangeReply struct {
-	Type      string `json:"type"`
-	UserCount int    `json:"user_count"`
-}
+var roomList map[string]Room //在线room列表
 
 type ServiceError struct {
 	Msg string
@@ -41,7 +24,7 @@ func Error(msg string) error {
 }
 
 func main() {
-
+  roomList = make(map[string]Room)
 	http.Handle("/", websocket.Handler(WsServer))
   serverConfig,err := getConfig("server");
   if(err != nil){
