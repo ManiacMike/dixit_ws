@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"strings"
 )
 
 type User struct {
@@ -16,6 +17,7 @@ type UserList []User
 type Room struct {
 	roomId   string
 	userlist []User
+	game Game
 }
 
 func (room *Room) New(ws *websocket.Conn, uid string) string {
@@ -58,7 +60,11 @@ func (room *Room) Exist(uid string) (bool, int) {
 }
 
 func (room *Room) PushUserCount(event string, uid string) {
-	userCount := UserCountChangeReply{event, uid, len(room.userlist)}
+	userlist := []string{}
+	for _,user := range room.userlist{
+		userlist = append(userlist,user.uid)
+	}
+	userCount := UserCountChangeReply{event, uid, len(room.userlist), strings.Join(userlist, ",")}
 	replyBody, err := json.Marshal(userCount)
 	if err != nil {
 		panic(err.Error())
