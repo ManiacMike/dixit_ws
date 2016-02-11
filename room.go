@@ -14,14 +14,14 @@ type User struct {
 type UserList []User
 
 type Room struct {
-	roomId string
+	roomId   string
 	userlist []User
 }
 
 func (room *Room) New(ws *websocket.Conn, uid string) string {
 	room.userlist = append(room.userlist, User{uid, ws})
 	fmt.Println("New user connect current user num", len(room.userlist))
-	go room.PushUserCount("user_connect",uid)
+	go room.PushUserCount("user_connect", uid)
 	roomList[room.roomId] = *room
 	return uid
 }
@@ -31,7 +31,7 @@ func (room *Room) Remove(uid string) {
 	fmt.Println("user disconnect uid: ", uid)
 	if flag == true {
 		room.userlist = append(room.userlist[:find], room.userlist[find+1:]...)
-		go room.PushUserCount("user_disconnect",uid)
+		go room.PushUserCount("user_disconnect", uid)
 		roomList[room.roomId] = *room
 	}
 }
@@ -57,7 +57,7 @@ func (room *Room) Exist(uid string) (bool, int) {
 	return flag, find
 }
 
-func (room *Room) PushUserCount(event string,uid string){
+func (room *Room) PushUserCount(event string, uid string) {
 	userCount := UserCountChangeReply{event, uid, len(room.userlist)}
 	replyBody, err := json.Marshal(userCount)
 	if err != nil {
