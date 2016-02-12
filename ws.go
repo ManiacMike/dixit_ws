@@ -48,8 +48,8 @@ func WsServer(ws *websocket.Conn) {
 
 	for {
 		var receiveMsg string
-
 		if err = websocket.Message.Receive(ws, &receiveMsg); err != nil {
+			room = roomList[room.roomId]
 			fmt.Println("Can't receive,user ", uid, " lost connection")
 			room.Remove(uid)
 			break
