@@ -9,7 +9,7 @@ import (
 
 const LINE_SEPARATOR = "#LINE_SEPARATOR#"
 
-func JsonStrToStruct(jsonStr string) map[string]interface{} {
+func JsonStrToMap(jsonStr string) map[string]interface{} {
 	jsonStr = strings.Replace(jsonStr, "\n", LINE_SEPARATOR, -1)
 	json, err := simplejson.NewJson([]byte(jsonStr))
 	if err != nil {

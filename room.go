@@ -74,7 +74,7 @@ func (room *Room) PushUserCount(event string, uid string) {
 }
 
 func (room *Room) Broadcast(replyBodyStr string) error {
-	fmt.Println("current room user", len(room.userlist))
+	fmt.Println("current ",room.roomId," room user", len(room.userlist))
 	for _, user := range room.userlist {
 		if err := websocket.Message.Send(user.con, replyBodyStr); err != nil {
 			fmt.Println("Can't send user ", user.uid, " lost connection")

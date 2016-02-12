@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-type MessageReply struct {
-	Type    string `json:"type"`
-	Uid     string `json:"uid"`
-	Content string `json:"content"`
-	Time    int64  `json:"time"`
-}
-
 type UserCountChangeReply struct {
 	Type      string `json:"type"`
 	Uid       string `json:"uid"`
@@ -55,10 +48,10 @@ func WsServer(ws *websocket.Conn) {
 			break
 		}
 
-		receiveNodes := JsonStrToStruct(receiveMsg)
+		receiveNodes := JsonStrToMap(receiveMsg)
+		receiveNodes["time"] = time.Now().Unix()
 		fmt.Println("Received back from client: ", receiveNodes)
-		reply := MessageReply{Type: "message", Uid: receiveNodes["uid"].(string), Content: receiveNodes["content"].(string), Time: time.Now().Unix()}
-		replyBody, err := json.Marshal(reply)
+		replyBody, err := json.Marshal(receiveNodes)
 		if err != nil {
 			panic(err.Error())
 		}
