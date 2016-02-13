@@ -1,9 +1,11 @@
 package main
 
+import ()
+
 type Game struct {
-	roomId   string
+	roomId string
 	host   string
-  round   int
-  stage   int
-  score   map[string]int
+	round  int
+	stage  int
+	score  map[string]int
 }

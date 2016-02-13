@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/net/websocket"
 	"strings"
 )
@@ -17,7 +19,7 @@ type UserList []User
 type Room struct {
 	roomId   string
 	userlist []User
-	game Game
+	game     Game
 }
 
 func (room *Room) New(ws *websocket.Conn, uid string) string {
@@ -61,8 +63,8 @@ func (room *Room) Exist(uid string) (bool, int) {
 
 func (room *Room) PushUserCount(event string, uid string) {
 	userlist := []string{}
-	for _,user := range room.userlist{
-		userlist = append(userlist,user.uid)
+	for _, user := range room.userlist {
+		userlist = append(userlist, user.uid)
 	}
 	userCount := UserCountChangeReply{event, uid, len(room.userlist), strings.Join(userlist, ",")}
 	replyBody, err := json.Marshal(userCount)
@@ -74,7 +76,7 @@ func (room *Room) PushUserCount(event string, uid string) {
 }
 
 func (room *Room) Broadcast(replyBodyStr string) error {
-	fmt.Println("current ",room.roomId," room user", len(room.userlist))
+	fmt.Println("current ", room.roomId, " room user", len(room.userlist))
 	for _, user := range room.userlist {
 		if err := websocket.Message.Send(user.con, replyBodyStr); err != nil {
 			fmt.Println("Can't send user ", user.uid, " lost connection")
@@ -83,4 +85,12 @@ func (room *Room) Broadcast(replyBodyStr string) error {
 		}
 	}
 	return nil
+}
+
+func (room *Room) startGame() {
+	db, err := sql.Open("mysql", "root:mike0125@/dixit?charset=utf8")
+	CheckErr(err)
+	_, err = db.Query("UPDATE `game` SET status = 1 WHERE `id`= " + room.roomId)
+	CheckErr(err)
+	db.Close()
 }

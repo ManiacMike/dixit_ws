@@ -23,6 +23,12 @@ func Error(msg string) error {
 	return &ServiceError{msg}
 }
 
+func CheckErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	roomList = make(map[string]Room)
 	http.Handle("/", websocket.Handler(WsServer))

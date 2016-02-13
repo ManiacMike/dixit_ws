@@ -11,7 +11,7 @@ type UserCountChangeReply struct {
 	Type      string `json:"type"`
 	Uid       string `json:"uid"`
 	UserCount int    `json:"user_count"`
-	UserList	string `json:"user_list"`
+	UserList  string `json:"user_list"`
 }
 
 func WsServer(ws *websocket.Conn) {
@@ -29,7 +29,7 @@ func WsServer(ws *websocket.Conn) {
 	room, exist := roomList[roomId]
 	if exist == false {
 		userlist := []User{}
-		room = Room{roomId:roomId, userlist:userlist}
+		room = Room{roomId: roomId, userlist: userlist}
 	}
 	userExist, index := room.Exist(uid)
 	if userExist == true {
@@ -47,9 +47,14 @@ func WsServer(ws *websocket.Conn) {
 			room.Remove(uid)
 			break
 		}
-
+		room = roomList[room.roomId]
+		// game := &room.game
 		receiveNodes := JsonStrToMap(receiveMsg)
+		if receiveNodes["type"] == "start" {
+			room.startGame()
+		}
 		receiveNodes["time"] = time.Now().Unix()
+		receiveNodes["uid"] = uid
 		fmt.Println("Received back from client: ", receiveNodes)
 		replyBody, err := json.Marshal(receiveNodes)
 		if err != nil {
