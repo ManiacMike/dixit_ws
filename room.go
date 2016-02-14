@@ -1,10 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/net/websocket"
 	"strings"
 )
@@ -88,9 +86,5 @@ func (room *Room) Broadcast(replyBodyStr string) error {
 }
 
 func (room *Room) startGame() {
-	db, err := sql.Open("mysql", "root:mike0125@/dixit?charset=utf8")
-	CheckErr(err)
-	_, err = db.Query("UPDATE `game` SET status = 1 WHERE `id`= " + room.roomId)
-	CheckErr(err)
-	db.Close()
+	query("UPDATE `game` SET status = 1 WHERE `id`= " + room.roomId)
 }
