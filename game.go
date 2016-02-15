@@ -44,13 +44,17 @@ func gameResult(room *Room) (map[string]int, bool) {
 	return totalScore, gameover
 }
 
-//TODO 考虑牌抓完的情况
 //TODO 考虑重连
 //抓牌
 func drawCards(num int, stack []int) ([]int, []int) {
 	rand.Seed(time.Now().Unix())
 	getCards := []int{}
 	for i := 0; i < num; i++ {
+		if len(stack) < 10 {
+			for index := 1; index < MAX_CARD_NUM+1; index++ {
+				stack = append(stack, index)
+			}
+		}
 		index := rand.Intn(len(stack))
 		getCards = append(getCards, stack[index])
 		stack = append(stack[:index], stack[index+1:]...)

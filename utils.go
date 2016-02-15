@@ -33,3 +33,24 @@ func JsonEncode(nodes interface{}) string {
 	}
 	return string(body)
 }
+
+func JsonDecode(jsonStr string) map[string]interface{} {
+	jsonStr = strings.Replace(jsonStr, "\n", LINE_SEPARATOR, -1)
+	var f interface{}
+	err := json.Unmarshal([]byte(jsonStr), &f)
+	if err != nil {
+		panic(err)
+	}
+	m := f.(map[string]interface{})
+	for k, v := range m {
+		switch v.(type) {
+		case string:
+			m[k] = v.(string)
+		case int:
+			m[k] = v.(int)
+		case float64:
+			m[k] = int(v.(float64))
+		}
+	}
+	return m
+}

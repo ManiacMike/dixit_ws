@@ -47,7 +47,7 @@ func WsServer(ws *websocket.Conn) {
 		}
 		room = roomList[room.roomId]
 		// game := &room.game
-		receiveNodes := JsonStrToMap(receiveMsg)
+		receiveNodes := JsonDecode(receiveMsg)
 		receiveType := receiveNodes["type"]
 		if receiveType == "start" {
 			room.StartGame(uid)
@@ -58,10 +58,5 @@ func WsServer(ws *websocket.Conn) {
 		} else if receiveType == "guess" {
 			room.GuestPick(uid, receiveNodes["card"].(int))
 		}
-		// receiveNodes["time"] = time.Now().Unix()
-		// receiveNodes["uid"] = uid
-		// fmt.Println("Received back from client: ", receiveNodes)
-		// replyBodyStr := JsonEncode(receiveNodes)
-		// go room.Broadcast(replyBodyStr)
 	}
 }
