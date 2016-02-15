@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
-	"time"
 )
 
 type UserCountChangeReply struct {
@@ -50,17 +48,20 @@ func WsServer(ws *websocket.Conn) {
 		room = roomList[room.roomId]
 		// game := &room.game
 		receiveNodes := JsonStrToMap(receiveMsg)
-		if receiveNodes["type"] == "start" {
-			room.startGame()
+		receiveType := receiveNodes["type"]
+		if receiveType == "start" {
+			room.StartGame(uid)
+		} else if receiveType == "hostpick" {
+			room.HostPick(receiveNodes["keyword"].(string), receiveNodes["card"].(int))
+		} else if receiveType == "guestpick" {
+			room.GuestPick(uid, receiveNodes["card"].(int))
+		} else if receiveType == "guess" {
+			room.GuestPick(uid, receiveNodes["card"].(int))
 		}
-		receiveNodes["time"] = time.Now().Unix()
-		receiveNodes["uid"] = uid
-		fmt.Println("Received back from client: ", receiveNodes)
-		replyBody, err := json.Marshal(receiveNodes)
-		if err != nil {
-			panic(err.Error())
-		}
-		replyBodyStr := string(replyBody)
-		go room.Broadcast(replyBodyStr)
+		// receiveNodes["time"] = time.Now().Unix()
+		// receiveNodes["uid"] = uid
+		// fmt.Println("Received back from client: ", receiveNodes)
+		// replyBodyStr := JsonEncode(receiveNodes)
+		// go room.Broadcast(replyBodyStr)
 	}
 }

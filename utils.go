@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/bitly/go-simplejson" // for json get
 	"strconv"
 	"strings"
@@ -22,4 +23,13 @@ func JsonStrToMap(jsonStr string) map[string]interface{} {
 
 func GenerateId() string {
 	return strconv.FormatInt(time.Now().UnixNano(), 10)
+}
+
+func JsonEncode(nodes interface{}) string {
+	body, err := json.Marshal(nodes)
+	if err != nil {
+		panic(err.Error())
+		return "[]"
+	}
+	return string(body)
 }
