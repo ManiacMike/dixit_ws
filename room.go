@@ -181,10 +181,9 @@ func (room *Room) Guess(uid string, card int) {
 		if gameover == false {
 			fillCards := room.roundInit()
 			replyBody["round"] = room.round
+			replyBody["host"] = room.host
 			for _, u := range room.userlist {
 				replyBody["fillcard"] = fillCards[u.uid]
-				replyBody["host"] = room.host
-				replyBody["round"] = room.round
 				room.Push(u, JsonEncode(replyBody))
 			}
 		} else {
@@ -204,6 +203,7 @@ func (room *Room) roundInit() map[string]int {
 	room.falsecard = make(map[string]int)
 	room.guess = make(map[string]int)
 	room.keyword = ""
+	room.round++
 	room.host = nextHost(room.host, room.userlist)
 	return fillCards
 }

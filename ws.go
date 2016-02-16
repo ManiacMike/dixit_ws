@@ -46,7 +46,6 @@ func WsServer(ws *websocket.Conn) {
 			break
 		}
 		room = roomList[room.roomId]
-		// game := &room.game
 		receiveNodes := JsonDecode(receiveMsg)
 		receiveType := receiveNodes["type"]
 		if receiveType == "start" {
