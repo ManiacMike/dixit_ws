@@ -103,6 +103,10 @@ func (room *Room) StartGame(creator string) {
 	room.host = creator
 	room.score = make(map[string]int)
 	room.round = 1
+	room.realcard = 0
+	room.falsecard = make(map[string]int)
+	room.guess = make(map[string]int)
+	room.keyword = ""
 	var stack []int
 	for index := 1; index < MAX_CARD_NUM+1; index++ {
 		stack = append(stack, index)
@@ -120,6 +124,7 @@ func (room *Room) StartGame(creator string) {
 		replyBody["host"] = room.host
 		room.Push(user, JsonEncode(replyBody))
 	}
+	roomList[room.roomId] = *room
 }
 
 func (room *Room) HostPick(keyword string, card int) {
@@ -130,6 +135,7 @@ func (room *Room) HostPick(keyword string, card int) {
 	reply["keyword"] = keyword
 	replyBody := JsonEncode(reply)
 	room.Broadcast(replyBody)
+	roomList[room.roomId] = *room
 }
 
 func (room *Room) GuestPick(uid string, card int) {
@@ -155,6 +161,7 @@ func (room *Room) GuestPick(uid string, card int) {
 		replyBody["cards"] = cards
 		room.Broadcast(JsonEncode(replyBody))
 	}
+	roomList[room.roomId] = *room
 }
 
 func (room *Room) Guess(uid string, card int) {
@@ -190,6 +197,7 @@ func (room *Room) Guess(uid string, card int) {
 			room.Broadcast(JsonEncode(replyBody))
 		}
 	}
+	roomList[room.roomId] = *room
 }
 
 func (room *Room) roundInit() map[string]int {
@@ -205,5 +213,6 @@ func (room *Room) roundInit() map[string]int {
 	room.keyword = ""
 	room.round++
 	room.host = nextHost(room.host, room.userlist)
+	roomList[room.roomId] = *room
 	return fillCards
 }

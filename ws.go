@@ -55,7 +55,7 @@ func WsServer(ws *websocket.Conn) {
 		} else if receiveType == "guestpick" {
 			room.GuestPick(uid, receiveNodes["card"].(int))
 		} else if receiveType == "guess" {
-			room.GuestPick(uid, receiveNodes["card"].(int))
+			room.Guess(uid, receiveNodes["card"].(int))
 		}
 	}
 }
