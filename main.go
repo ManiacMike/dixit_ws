@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/user/gwork"
+	"github.com/ManiacMike/gwork"
 )
 
 func main() {

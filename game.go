@@ -3,7 +3,7 @@ package main
 import (
 	"math/rand"
 	"time"
-	"github.com/user/gwork"
+	"github.com/ManiacMike/gwork"
 	"sort"
 )
 
