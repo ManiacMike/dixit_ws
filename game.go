@@ -5,6 +5,8 @@ import (
 	"time"
 	"github.com/ManiacMike/gwork"
 	"sort"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const MAX_CARD_NUM = 450
@@ -27,7 +29,13 @@ type DixitRoom struct {
 var DixitRoomList map[string]DixitRoom
 
 func (room *DixitRoom) StartGame(creator string) {
-	gwork.MysqlQuery("UPDATE `game` SET status = 1 WHERE `id`= " + room.RoomId)
+	db,err := sql.Open("mysql", dixitMysqlDsn)
+	if err != nil{
+		panic(err)
+		return
+	}
+	db.Query("UPDATE `game` SET status = 1 WHERE `id`= ?", room.RoomId)
+	defer db.Close()
 	room.host = creator
 	room.score = make(map[string]int)
 	room.round = 1
@@ -174,6 +182,14 @@ func gameResult(room *DixitRoom) (map[string]int, bool) {
 	for _, u := range room.gworkRoom.Userlist {
 		totalScore[u.Uid] = totalScore[u.Uid] + score[u.Uid]
 		if totalScore[u.Uid] > WIN_SCORE || totalScore[u.Uid] == WIN_SCORE {
+			go func(){
+				db,err := sql.Open("mysql", dixitMysqlDsn)
+				if err != nil{
+					panic(err)
+				}
+				db.Query("UPDATE `game` SET status = 2 WHERE `id`= ?", room.RoomId)
+				defer db.Close()
+			}()
 			gameover = true
 		}
 	}
