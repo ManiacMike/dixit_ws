@@ -1,12 +1,12 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-	"github.com/ManiacMike/gwork"
-	"sort"
 	"database/sql"
+	"github.com/ManiacMike/gwork"
 	_ "github.com/go-sql-driver/mysql"
+	"math/rand"
+	"sort"
+	"time"
 )
 
 const MAX_CARD_NUM = 450
@@ -14,23 +14,23 @@ const MAX_CARD_NUM = 450
 const WIN_SCORE = 30
 
 type DixitRoom struct {
-		RoomId	  string
-		host      string
-		round     int
-		score     map[string]int
-		cardStack []int
-		realcard  int
-		falsecard map[string]int
-		guess     map[string]int
-		keyword   string
-		gworkRoom *gwork.Room
+	RoomId    string
+	host      string
+	round     int
+	score     map[string]int
+	cardStack []int
+	realcard  int
+	falsecard map[string]int
+	guess     map[string]int
+	keyword   string
+	gworkRoom *gwork.Room
 }
 
-var DixitRoomList map[string]DixitRoom
+var DixitRoomList map[string]*DixitRoom
 
 func (room *DixitRoom) StartGame(creator string) {
-	db,err := sql.Open("mysql", dixitMysqlDsn)
-	if err != nil{
+	db, err := sql.Open("mysql", dixitMysqlDsn)
+	if err != nil {
 		panic(err)
 		return
 	}
@@ -58,20 +58,17 @@ func (room *DixitRoom) StartGame(creator string) {
 		replyBody["type"] = "start"
 		replyBody["cards"] = cards
 		replyBody["host"] = room.host
-		room.gworkRoom.Push(user, gwork.JsonEncode(replyBody))
+		room.gworkRoom.Push(user, replyBody)
 	}
-	DixitRoomList[room.RoomId] = *room
 }
 
 func (room *DixitRoom) HostPick(keyword string, card int) {
 	room.keyword = keyword
 	room.realcard = card
-	reply := make(map[string]string)
+	reply := make(map[string]interface{})
 	reply["type"] = "hostpick"
 	reply["keyword"] = keyword
-	replyBody := gwork.JsonEncode(reply)
-	room.gworkRoom.Broadcast(replyBody)
-	DixitRoomList[room.RoomId] = *room
+	room.gworkRoom.Broadcast(reply)
 }
 
 func (room *DixitRoom) GuestPick(uid string, card int) {
@@ -95,9 +92,8 @@ func (room *DixitRoom) GuestPick(uid string, card int) {
 		replyBody := make(map[string]interface{})
 		replyBody["type"] = "showcards"
 		replyBody["cards"] = cards
-		room.gworkRoom.Broadcast(gwork.JsonEncode(replyBody))
+		room.gworkRoom.Broadcast(replyBody)
 	}
-	DixitRoomList[room.RoomId] = *room
 }
 
 func (room *DixitRoom) Guess(uid string, card int) {
@@ -127,13 +123,12 @@ func (room *DixitRoom) Guess(uid string, card int) {
 			replyBody["host"] = room.host
 			for _, u := range room.gworkRoom.Userlist {
 				replyBody["fillcard"] = fillCards[u.Uid]
-				room.gworkRoom.Push(u, gwork.JsonEncode(replyBody))
+				room.gworkRoom.Push(u, replyBody)
 			}
 		} else {
-			room.gworkRoom.Broadcast(gwork.JsonEncode(replyBody))
+			room.gworkRoom.Broadcast(replyBody)
 		}
 	}
-	DixitRoomList[room.RoomId] = *room
 }
 
 func (room *DixitRoom) roundInit() map[string]int {
@@ -149,7 +144,6 @@ func (room *DixitRoom) roundInit() map[string]int {
 	room.keyword = ""
 	room.round++
 	room.host = nextHost(room.host, room.gworkRoom.Userlist)
-	DixitRoomList[room.RoomId] = *room
 	return fillCards
 }
 
@@ -182,9 +176,9 @@ func gameResult(room *DixitRoom) (map[string]int, bool) {
 	for _, u := range room.gworkRoom.Userlist {
 		totalScore[u.Uid] = totalScore[u.Uid] + score[u.Uid]
 		if totalScore[u.Uid] > WIN_SCORE || totalScore[u.Uid] == WIN_SCORE {
-			go func(){
-				db,err := sql.Open("mysql", dixitMysqlDsn)
-				if err != nil{
+			go func() {
+				db, err := sql.Open("mysql", dixitMysqlDsn)
+				if err != nil {
 					panic(err)
 				}
 				db.Query("UPDATE `game` SET status = 2 WHERE `id`= ?", room.RoomId)
